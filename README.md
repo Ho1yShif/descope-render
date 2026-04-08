@@ -6,7 +6,7 @@ A simple FastMCP server template for [Render](https://render.com), with full MCP
 
 - A working MCP server using [FastMCP](https://gofastmcp.com/getting-started/welcome) with Streamable HTTP transport
 - Full MCP Authorization Support with FastMCP's `DescopeProvider` and the `descope-mcp` SDK
-- One example tool (`hello`) that returns `"Hello, world!"` and enforces the `mcp:greet` scope
+- One example tool (`hello`) that returns `"Hello, world!"` and enforces tool-level scope requirements (`mcp:greet`)
 - A `render.yaml` Blueprint for easy deployment
 
 > **Note:** This template deploys on Render's free plan by default. Free services spin down after 15 minutes of inactivity, causing cold starts of 30-60 seconds on the next request. MCP clients may time out during this delay. For reliable use, upgrade to a [paid plan](https://render.com/pricing) in the Render Dashboard — the Starter plan keeps your service running continuously.
@@ -33,27 +33,33 @@ A simple FastMCP server template for [Render](https://render.com), with full MCP
 
    This is your `DESCOPE_CONFIG_URL`.
 
-> **Note:** Descope issues tokens bound by Resource Indicators (RFC 8707), as required by the MCP spec. If you're deploying to Render or running locally, you'll need to go back to your MCP Server in Descope and update the MCP Server URLs section.
+> **Note:** Descope issues tokens following Resource Indicators (RFC 8707), as required by the MCP spec. When you're deploying to Render or running locally, you'll need to update the MCP Server URLs section.
 
 ## Deploying to Render
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+> Ensure that you've completed the [Descope Setup](#descope-setup) step prior to developing locally, as you'll need your `DESCOPE_CONFIG_URL`.
 
-1. Click **Deploy to Render** above (or push this repo to GitHub and import it as a Blueprint).
-2. When prompted, set the environment variable to the value obtained in the [Descope Setup](#descope-setup) step:
+1. Fork this repository to your GitHub account.
+2. Click **Deploy to Render** (or push this repo to GitHub and import it as a Blueprint in Render).
+
+   [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+
+3. In your Specified Configurations, set the environment variable to the value obtained in the [Descope Setup](#descope-setup) step:
 
    | Key | Value |
    | --- | --- |
    | `DESCOPE_CONFIG_URL` | Your Well-Known URL from the Descope Console |
 
-3. Click **Deploy Blueprint**.
-4. Once live, copy your Render service URL (e.g. `https://<your-project>.onrender.com`) and add it to **MCP Server URLs** in the Descope Console.
+4. Click **Deploy Blueprint**.
+5. Once live, copy your Render service URL (e.g. `https://<your-project>.onrender.com`) and add it to **MCP Server URLs** in the Descope Console.
 
 *You now have a remotely hosted MCP Server with the full auth spec supported!*
 
 ## Local development
 
 > Ensure that you've completed the [Descope Setup](#descope-setup) step prior to developing locally, as you'll need your `DESCOPE_CONFIG_URL`.
+
+First, fork this repo to your GitHub account, then follow the instructions below to set up your environment.
 
 ```bash
 # Install dependencies
@@ -74,14 +80,6 @@ When you run this locally, your server will run at `http://localhost:8000/mcp`.
 | Tool | Description | Required scope |
 | --- | --- | --- |
 | `hello` | Returns `"Hello, world!"` | `mcp:greet` |
-
-## How MCP Auth works
-
-1. An MCP client (e.g. Claude Desktop, Cursor) discovers OAuth metadata from `/.well-known/oauth-authorization-server` when trying to connect to your MCP Server.
-2. The client registers dynamically (via CIMD or DCR) to the authorization server and redirects the user to Descope's login / consent flow.
-3. After login, Descope issues a signed JWT. The client includes this as a Bearer token on every MCP request.
-4. `DescopeProvider` validates the JWT using Descope's JWKS endpoint before any tool is called.
-5. Inside the tool, `validate_token()` parses the claims and `require_scopes()` checks that `mcp:greet` is present, returning an error to the client if not.
 
 ## Next steps
 
@@ -116,6 +114,14 @@ By default, your service is reachable at `https://<your-project>.onrender.com`. 
 ### Protect all tools with scopes
 
 The `require_scopes()` check is intentionally opt-in per tool so you can add unauthenticated tools if needed. For a production server, it is good practice to call `require_scopes()` in every tool. You can also centralize this by writing a helper that wraps `validate_token()` and `require_scopes()` and calling it at the top of each tool handler.
+
+## How MCP Auth works
+
+1. An MCP client (e.g. Claude Desktop, Cursor) discovers OAuth metadata from `/.well-known/oauth-authorization-server` when trying to connect to your MCP Server.
+2. The client registers dynamically (via CIMD or DCR) to the authorization server and redirects the user to Descope's login / consent flow.
+3. After login, Descope issues a signed JWT. The client includes this as a Bearer token on every MCP request.
+4. `DescopeProvider` validates the JWT using Descope's JWKS endpoint before any tool is called.
+5. Inside the tool, `validate_token()` parses the claims and `require_scopes()` checks that `mcp:greet` is present, returning an error to the client if not.
 
 ## Learn more
 

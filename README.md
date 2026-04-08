@@ -22,9 +22,9 @@ A simple FastMCP server template for [Render](https://render.com), with full MCP
 1. Log in to the [Descope Console](https://app.descope.com).
 2. Navigate to **Agentic Identity Hub → MCP Servers**.
 3. Click **Create MCP Server** and give it a name.
-4. Under **MCP Client Registration**, enable **Client ID Metadata Documents (CIMD)** and **Dynamic Client Registration (DCR)**.
-5. Under **MCP Server Scopes**, add a scope named `mcp:greet`.
-6. Click **Save**.
+4. Under **MCP Client Registration**, enable **Client ID Metadata Documents (CIMD)** and **Dynamic Client Registration (DCR)**. Optionally, you can restrict allowed domains for clients registering via CIMD (e.g. `https://claude.ai`) - feel free to leave this field blank.
+5. Under **MCP Server Scopes**, add a scope named `mcp:greet` and a simple description like "Greet the user".
+6. Click **Create**.
 7. Copy the **Well-Known URL** from the confirmation page — it looks like:
 
    ```url
@@ -51,7 +51,7 @@ A simple FastMCP server template for [Render](https://render.com), with full MCP
    | `DESCOPE_CONFIG_URL` | Your Well-Known URL from the Descope Console |
 
 4. Click **Deploy Blueprint**.
-5. Once live, copy your Render service URL (e.g. `https://<your-project>.onrender.com`) and add it to **MCP Server URLs** in the Descope Console.
+5. Once live, copy your Render service URL (e.g. `https://<your-project>.onrender.com`), append `/mcp`, and add it to **MCP Server URLs** in the Descope Console.
 
 *You now have a remotely hosted MCP Server with the full auth spec supported!*
 
